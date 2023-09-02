@@ -1,75 +1,68 @@
-import Card from '@/components/card';
-import { CardData } from '@/types';
-import { cardData } from '@/utils/data';
-import { AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
-import { SetStateAction, useState } from 'react';
-import Lights from '../public/lights.png';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import move from "lodash-move";
+
+const CARD_COLORS: string[] = ["#266678", "#cb7c7a", " #36a18b", "#cda35f", ];
+const CARD_OFFSET: number = 20;
+const SCALE_FACTOR: number = 0.1;
+
+const wrapperStyle: React.CSSProperties = {
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100vh"
+};
+
+const cardWrapStyle: React.CSSProperties = {
+  position: "relative",
+  width: "250px",
+  height: "420px"
+};
+
+const cardStyle: React.CSSProperties = {
+  position: "absolute",
+  minWidth: "250px",
+  height: "420px",
+  borderRadius: "13px",
+  transformOrigin: "bottom right",
+  listStyle: "none"
+};
 
 export default function Home() {
-  const [cards, setCards] = useState<CardData[]>(cardData);
-  const [rightSwipe, setRightSwipe] = useState(0);
-  const [leftSwipe, setLeftSwipe] = useState(0);
-
-  const activeIndex = cards.length - 1;
-  const removeCard = (id: number, action: 'right' | 'left') => {
-    setCards((prev) => prev.filter((card) => card.id !== id));
-    if (action === 'right') {
-      setRightSwipe((prev) => prev + 1);
-    } else {
-      setLeftSwipe((prev) => prev + 1);
-    }
+  const [cards, setCards] = useState<string[]>(CARD_COLORS);
+  const moveToEnd = (from: number): void => {
+    setCards(move(cards, from, cards.length - 1));
   };
 
-  const stats = [
-    {
-      name: 'Left',
-      count: leftSwipe,
-    },
-    {
-      name: 'Right',
-      count: rightSwipe,
-    },
-  ];
-
   return (
-    <div className="relative flex h-screen w-full items-center justify-center overflow-clip bg-bgBlack text-textGrey">
-      <div className="absolute bottom-0 h-[50%] w-screen scale-125 sm:h-[80%] sm:scale-110 md:scale-100">
-        <Image
-          src={Lights}
-          fill
-          alt=""
-          className="relative -mt-6 h-auto w-[100%] sm:mt-1"
-        />
-      </div>
-      <AnimatePresence>
-        {cards.length ? (
-          cards.map((card) => (
-            <Card
-              key={card.id}
-              data={card}
-              active={card.id === activeIndex}
-              removeCard={removeCard}
+    <AnimatePresence>
+      <div style={wrapperStyle}>
+      <ul style={cardWrapStyle}>
+        {cards.map((color, index) => {
+          return (
+            <motion.li
+              key={color}
+              style={{
+                ...cardStyle,
+                backgroundColor: color,
+                cursor: "pointer"
+              }}
+              animate={{
+                bottom: index * CARD_OFFSET,
+                left: index * CARD_OFFSET,
+                scale: 1 - index * SCALE_FACTOR,
+                zIndex: CARD_COLORS.length - index
+              }}
+              exit={{ opacity: 0 }}
+              onTap={() => moveToEnd(index)}
             />
-          ))
-        ) : (
-          <h2 className="absolute z-10 text-center text-2xl font-bold text-textGrey ">
-            Excessive swiping can be injurious to health!
-            <br />
-            Come back tomorrow for more
-          </h2>
-        )}
-      </AnimatePresence>
-      {/* <div className="absolute bottom-6 flex space-x-8 items-center  text-slate-200">
-        {stats.map((stat) => (
-          <div key={stat.name} className="flex flex-col items-center space-y-3">
-            <div className="w-12 h-12 flex justify-center items-center text-slate-800 rounded-full bg-slate-200">
-              {stat.count}
-            </div>
-            <p className="font-semibold text-slate-400 text-lg">{stat.name}</p>
-          </div>
-        ))}
-      </div> */}
+          );
+        })}
+      </ul>
     </div>
+
+    </AnimatePresence>
+    
   );
-}
+};

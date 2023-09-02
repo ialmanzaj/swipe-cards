@@ -1,5 +1,5 @@
 import '@/styles/globals.css';
-import { Baloo_Bhaijaan_2 } from '@next/font/google';
+import { Baloo_Bhaijaan_2 } from 'next/font/google';
 import type { AppProps } from 'next/app';
 
 const baloo = Baloo_Bhaijaan_2({
